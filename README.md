@@ -1,7 +1,7 @@
 # DGS_3231
-A registers-based approach to managing an accurate Real Time Clock
+A fresh approach to managing the DS3231 Real Time Clock
 
-This library takes a fresh approach to writing Arduino code for a DS3231 Real Time Clock module. For the sake of simplicity and transparency:
+This library adds some resources that may be hard to find in other libraries supporting the super-accurate DS3231 Real Time Clock module. For the sake of simplicity and transparency:
 
 * A copy of the hardware registers inside the device is downloaded to local storage in the Arduino. 
 * Macros make every field in the device registers explicitly available to the code writer.
@@ -44,5 +44,9 @@ There's more to do. For example, the structure of the repository. Right now, the
 But that's not for a while yet. So if you are interested, please look at the ".h" and ".cpp" files that appear inside each of the example project folders.
 
 Thanks
+
 David
+
 December 25, 2022
+
+P.S. I named the library "DGS_3231" as a mashup of DS3231 and my initials. In old age, fun with names is about all the fun a fella can still have! <grin>
