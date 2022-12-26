@@ -29,12 +29,14 @@
 
 #include "DGS_3231.h"
 
-DS3231_TIME myClock (12, 25, 22, 18, 43, 0, MODE24HR);
+// Initialize local store with a current time setting.
+// Not really necessary for this demo, just showing how to do it.
+DGS_3231 myClock (12, 26, 22, 11, 36, 0, MODE24HR);
 
 // function prototypes
 void showTime ();         // to output time via Serial
-void handleAlarm (void);  // user-ISR for this project
-void manageAlarm1 ();     // performs all the alarm operations
+void soundTheAlarm (void);  // user-ISR for this project
+void manageAlarm ();     // performs all the alarm operations
 
 // global variables
 volatile bool alarmReceived = false;
@@ -42,6 +44,8 @@ volatile bool alarmReceived = false;
 void setup() {
 
   Wire.begin();       // I2C
+  myClock.uploadTime ();      // sending the local store to the device
+                      // sets the time registers on the device
   
   Serial.begin(9600);
   while (!Serial);    // wait for serial port to open
@@ -51,13 +55,13 @@ void setup() {
   Serial.print    ("Initial time: ");
   showTime();
 
-  // store the initial "time" seconds as the Alarm 1 seconds
+  // set the initial alarm seconds equal to the initial time seconds
   myClock.setA1second (myClock.getSeconds ());
   // set Alarm 1 to signal when alarm and time seconds match
   myClock.setA1matchbits (DS3231_A1MATCHSEC);
   // call a subroutine to advance the alarm 1 seconds value
-  // and activate Alarm 1
-  manageAlarm1 ();
+  // and uploads everything needed to activate Alarm 1
+  manageAlarm ();
 
   pinMode(LED_BUILTIN, OUTPUT);   // use the onboard led to signal alarm events
   digitalWrite(LED_BUILTIN, LOW); // set its initial state
@@ -78,14 +82,14 @@ void loop() {
 
   // check for and respond to alarm events
   if (alarmReceived) {
-    manageAlarm1 ();              // turn off, advance and reset the alarm
+    manageAlarm ();              // turn off, advance and reset the alarm
     alarmReceived = false;        // turn off the interupt semaphore
     digitalWrite (LED_BUILTIN, 
     ! digitalRead (LED_BUILTIN)); // toggle the LED
     Serial.println("Alarm!");     // announce it, too
   }
-
-}
+  
+} // loop()
 
 // interrupt service routine
 void soundTheAlarm (void) {
@@ -115,21 +119,29 @@ void showTime () {
 }
 
 // do all things relating to the alarm
-void manageAlarm1 () {
+void manageAlarm () {
   // download the control and status registers to local storage
-  myClock.downloadCS ();
+  myClock.downloadControl ();
+  myClock.downloadStatus ();
+  
   // turn off all the alarm-related bits in the local store
   myClock.disableAlarm1interrupt ();
   myClock.disableAlarm2interrupt ();
   myClock.resetAlarmFlags ();
-  // upload the revised registers to the device to turn off the alarms
-  myClock.uploadCS ();
+  
+  // upload the revised control and status registers to turn off the alarms
+  myClock.uploadControl ();
+  myClock.uploadStatus ();
+  
   // add 5 seconds to the alarm time, handle overflow beyond 60
   myClock.setA1second (( myClock.getA1second() + 5) % 60);
+  
   // upload the updated alarm time registers
   myClock.uploadAlarm1 ();
-  // set the relevant alarm-related bits in the local store
+  
+  // set the relevant alarm-related bits in the local control register copy
   myClock.enableAlarm1interrupt ();
-  // upload the control and status registers to re-enable the alarm
-  myClock.uploadCS ();
+  
+  // upload the revised control register to re-enable the alarm
+  myClock.uploadControl ();
 }
