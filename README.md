@@ -7,7 +7,7 @@ This library adds some resources that may be hard to find in other libraries sup
 * Macros make every field in the device registers explicitly available to the code writer.
 * Functions are provided for the tasks that most programmers may be likely to pursue. An effort was made to keep the functions simple, "atomic", and to give them self-descriptive names.
 
-"Atomic" means a function does just one thing or returns one value. Short, atomic may be conducive to writing code that is easier to maintain over time.
+"Atomic" means a function does just one thing or returns one value. Short, atomic statements may be conducive to writing code that is easier to maintain over time.
 
 ## Library files location
 Right now, the library is implemented within the Arduino programs provided in the "examples" folder.  The library files are located inside the folder for each example program. They load into the Arduino IDE editor alongside the corresponding .ino file. 
@@ -37,7 +37,9 @@ I was able to pursue the project of that day by avoiding the use of DateTime.
 
 Why would I desire to use an instance of DateTime, anyway? Because the NorthernWidget library uses a DateTime instance in a desirable way. Its RTClib::now() function downloads all of the time registers in a single go and returns their values in a DateTime.
 
-Pulling all seven of the time-related registers as a group ensures that all of the time/date values obtained from the DS3231 relate to the same tick of the clock. That's why.
+Pulling all seven of the time-related registers as a group ensures that all of the time/date values obtained from the DS3231 relate to the same tick of the clock. But I failed to see how to do that within the existing code of the NorthernWidget DS3231 library.
+
+Sometimes, starting over can be the quickest solution. That's why.
 
 ## OK then, how?
 
